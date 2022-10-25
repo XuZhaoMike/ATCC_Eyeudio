@@ -34,7 +34,7 @@ def scan(image_size=(32, 32)):
 def on_click(x, y, button, pressed):
   if pressed:
     eyes = scan()
-    if not eyes is None:
+    if eyes:
       filename = str(eye_imgs) + "/" + "{} {} {}.jpeg".format(x, y, button)
       cv2.imwrite(filename, eyes)
       

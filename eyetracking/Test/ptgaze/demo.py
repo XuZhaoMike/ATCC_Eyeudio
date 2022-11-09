@@ -62,10 +62,13 @@ class Demo:
             cv2.imwrite(output_path.as_posix(), self.visualizer.image)
 
     def _run_on_video(self) -> None:
+        cv2.namedWindow('frame')        # Create a named window
+        cv2.moveWindow('frame', 500,300)  # Move it
         while True:
             if self.config.demo.display_on_screen:
                 self._wait_key()
                 if self.stop:
+                    cv2.destroyAllWindows()
                     break
 
             ok, frame = self.cap.read()

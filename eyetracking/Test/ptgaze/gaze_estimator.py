@@ -1,6 +1,7 @@
 import logging
 from typing import List
 
+import cv2
 import numpy as np
 import torch
 from omegaconf import DictConfig
@@ -50,6 +51,9 @@ class GazeEstimator:
         self._face_model3d.estimate_head_pose(face, self.camera)
         self._face_model3d.compute_3d_pose(face)
         self._face_model3d.compute_face_eye_centers(face, self._config.mode)
+        self.facedistance = face.distance
+        self.facecenter = face.center
+        # print("center",face.center)
 
         if self._config.mode == 'MPIIGaze':
             for key in self.EYE_KEYS:
@@ -109,6 +113,10 @@ class GazeEstimator:
         face.normalized_gaze_angles = prediction[0]
         face.angle_to_vector()
         face.denormalize_gaze_vector()
+        # print("nor_gaze:",face.normalized_gaze_vector,"gaze:",face.gaze_vector)
+        if len(self.results) > 10:
+            self.results.pop(0)
+        self.results.append(face.gaze_vector) # this line is to add current predicted results into results.
 
     @torch.no_grad()
     def _run_ethxgaze_model(self, face: Face) -> None:

@@ -9,6 +9,7 @@ from os import makedirs, path
 from time import strftime, localtime
 import time
 import eyetracking
+import click
 
 
 
@@ -16,7 +17,8 @@ import eyetracking
 class MainWindow():
     def __init__(self):
         self.tracker = eyetracking.Tracker()
-        time.sleep(5)
+        self.tclick = click.T_click()
+        time.sleep(4)
         app = QtWidgets.QApplication(argv)
         MainWindow = QtWidgets.QMainWindow()
         self.raw_image = None
@@ -34,7 +36,7 @@ class MainWindow():
     def action_connect(self):
 
         self.ui.runButton.clicked.connect(self.run_or_continue)
-        self.ui.fileButton.clicked.connect(self.open_file)
+        self.ui.fileButton.clicked.connect(self.train_toungue)
 
         self.ui.cameraButton.clicked.connect(self.button_open_camera_click)
         self.ui.resetButton.clicked.connect(self.resetCounter)
@@ -42,24 +44,10 @@ class MainWindow():
         self.ui.saveCheckBox.clicked.connect(self.is_save)
 
 
-    def open_file(self):
-        print('to do open_file')
-        # config_file = 'config/fold.json'
-        # # config = json.load(open(config_file, 'r', encoding='utf-8'))
-        # config = json.load(open(config_file, 'r', encoding='utf-8'))
-        # open_fold = config['open_fold']
-        # if not os.path.exists(open_fold):
-        #     open_fold = os.getcwd()
-        # name, _ = QFileDialog.getOpenFileName(None, '', open_fold, "Pic File(*.mp4 *.mkv *.avi *.flv "
-        #                                                                   "*.jpg *.png)")
-        # if name:
-        #     # self.det_thread.source = name
-        #     # self.statistic_msg('：{}'.format(os.path.basename(name)))
-        #     config['open_fold'] = os.path.dirname(name)
-        #     config_json = json.dumps(config, ensure_ascii=False, indent=2)
-        #     with open(config_file, 'w', encoding='utf-8') as f:
-        #         f.write(config_json)
-        #     self.stop()
+    def train_toungue(self):
+        flag, self.camera_image = self.ui.cap.read()
+        self.tclick.frame = self.camera_image
+        self.tclick.t_click_train()
 
     def showCounter(self):
         self.ui.fps_label.setText('fps：' + str(self.fd.FPS))
@@ -71,20 +59,21 @@ class MainWindow():
 
     def show_camera(self):
         flag, self.camera_image = self.ui.cap.read()
-        self.tracker.demo.ok = flag
-        self.tracker.demo.frame = self.camera_image
-        self.tracker.demo.camstart = True
-        # self.camera_image = self.tracker.demo.frame
         self.frameCount += 1
 
-        # if self.enableDet:
-        #     self.fd.detection(self.camera_image)
-        #     img_src = self.fd.image
+        if self.enableDet:
+            # self.fd.detection(self.camera_image)
+            self.tracker.demo.ok = flag
+            self.tracker.demo.frame = self.camera_image
+            self.tracker.demo.camstart = True
+            self.tclick.camstart = True
+            self.tclick.frame = self.camera_image
+            # img_src = self.fd.image
         # else:
         img_src = self.camera_image
         # -------------TODO: find a way to use eyetracking stream
-        if self.tracker.demo.visualizer.image is not None:
-            img_src = self.tracker.demo.visualizer.image
+        # if self.tracker.demo.visualizer.image is not None:
+        #     img_src = self.tracker.demo.visualizer.image
         # -------------
         ih, iw, _ = img_src.shape
         w = self.ui.out_video.geometry().width()
@@ -102,7 +91,7 @@ class MainWindow():
             nh = h
             img_src_ = resize(img_src, (nw, nh))
 
-        # img_src_ = flip(img_src_, 1)
+        img_src_ = flip(img_src_, 1)
 
         show = cvtColor(img_src_, COLOR_BGR2RGB)
 

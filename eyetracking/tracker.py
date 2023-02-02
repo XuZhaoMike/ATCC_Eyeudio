@@ -202,7 +202,10 @@ class Tracker:
         calib_p = np.zeros((num_p_c,num_p_r,2))
         
         calib_done = False
-
+        while True:
+            if self.demo.camstart:
+                break
+        sleep(1)
         while True:
             if self.use_eye:
                 if len(self.demo.gaze_estimator.results)==0:

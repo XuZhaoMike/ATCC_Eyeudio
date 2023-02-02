@@ -7,6 +7,7 @@ from sys import argv, exit
 from cv2 import VideoWriter, resize, flip, cvtColor, COLOR_BGR2RGB, imwrite, CAP_PROP_FPS, VideoWriter_fourcc
 from os import makedirs, path
 from time import strftime, localtime
+import time
 import eyetracking
 
 
@@ -14,6 +15,8 @@ import eyetracking
 
 class MainWindow():
     def __init__(self):
+        self.tracker = eyetracking.Tracker()
+        time.sleep(5)
         app = QtWidgets.QApplication(argv)
         MainWindow = QtWidgets.QMainWindow()
         self.raw_image = None
@@ -25,7 +28,6 @@ class MainWindow():
         self.save_fold = './result'
         self.frameCount = 0
         MainWindow.show()
-        self.tracker = eyetracking.Tracker()
         exit(app.exec_())
 
 
@@ -69,16 +71,20 @@ class MainWindow():
 
     def show_camera(self):
         flag, self.camera_image = self.ui.cap.read()
+        self.tracker.demo.ok = flag
+        self.tracker.demo.frame = self.camera_image
+        self.tracker.demo.camstart = True
+        # self.camera_image = self.tracker.demo.frame
         self.frameCount += 1
 
-        if self.enableDet:
-            self.fd.detection(self.camera_image)
-            img_src = self.fd.image
-        else:
-            img_src = self.camera_image
+        # if self.enableDet:
+        #     self.fd.detection(self.camera_image)
+        #     img_src = self.fd.image
+        # else:
+        img_src = self.camera_image
         # -------------TODO: find a way to use eyetracking stream
-        # if self.tracker.demo.visualizer.image is not None:
-        #     img_src = self.tracker.demo.visualizer.image
+        if self.tracker.demo.visualizer.image is not None:
+            img_src = self.tracker.demo.visualizer.image
         # -------------
         ih, iw, _ = img_src.shape
         w = self.ui.out_video.geometry().width()
@@ -96,7 +102,7 @@ class MainWindow():
             nh = h
             img_src_ = resize(img_src, (nw, nh))
 
-        img_src_ = flip(img_src_, 1)
+        # img_src_ = flip(img_src_, 1)
 
         show = cvtColor(img_src_, COLOR_BGR2RGB)
 

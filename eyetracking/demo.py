@@ -37,6 +37,10 @@ class Demo:
         self.show_normalized_image = self.config.demo.show_normalized_image
         self.show_template_model = self.config.demo.show_template_model
 
+        self.ok = False
+        self.frame = None
+        self.camstart = False
+
     def run(self) -> None:
         if self.config.demo.use_camera or self.config.demo.video_path:
             self._run_on_video()
@@ -62,22 +66,26 @@ class Demo:
             cv2.imwrite(output_path.as_posix(), self.visualizer.image)
 
     def _run_on_video(self) -> None:
-        cv2.namedWindow('frame')        # Create a named window
-        cv2.moveWindow('frame', 500,300)  # Move it
+        # cv2.namedWindow('frame')        # Create a named window
+        # cv2.moveWindow('frame', 500,300)  # Move it
         while True:
+            if not self.camstart:
+                continue
             if self.config.demo.display_on_screen:
                 self._wait_key()
                 if self.stop:
                     cv2.destroyAllWindows()
                     break
 
-            ok, frame = self.cap.read()
+            # ok, frame = self.cap.read()
+            ok = self.ok
+            frame = self.frame
             if not ok:
                 break
             self._process_image(frame)
 
-            if self.config.demo.display_on_screen:
-                cv2.imshow('frame', self.visualizer.image)
+            # if self.config.demo.display_on_screen:
+            #     cv2.imshow('frame', self.visualizer.image)
         self.cap.release()
         if self.writer:
             self.writer.release()

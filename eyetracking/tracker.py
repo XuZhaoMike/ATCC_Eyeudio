@@ -203,10 +203,14 @@ class Tracker:
         
         calib_done = False
         while True:
+            sleep(0.001)
             if self.demo.camstart:
                 break
         sleep(1)
         while True:
+            if not self.demo.camstart:
+                sleep(0.001)
+                continue
             if self.use_eye:
                 if len(self.demo.gaze_estimator.results)==0:
                     continue

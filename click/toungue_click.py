@@ -6,6 +6,7 @@ from tensorflow.keras.optimizers import RMSprop
 
 from pynput.mouse import Button, Controller
 from threading import Thread
+from time import sleep
 
 
 class T_click():
@@ -24,14 +25,14 @@ class T_click():
         t1 = Thread(target=self.t_click_detect_continuously, args=())
         t1.start()
     
-    def get_data(self, img):
+    def get_data(self, vid):
         tongue_out_examples = []
         other_examples = []
 
         print('stick the tip of your tongue out and scan the screen')
         for i in range(self.num_tongue_frames):
-            # ret, img = vid.read()
-            img = self.frame
+            ret, img = vid.read()
+            # img = self.frame
             # cv2.imshow('frame', img)
             gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
             faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(32, 32), flags=cv2.CASCADE_SCALE_IMAGE)
@@ -47,8 +48,8 @@ class T_click():
 
         print('great job! now relax your face to a normal resting position and scan the screen until the next message')
         for i in range(self.num_other_frames // 2):
-            # ret, img = vid.read()
-            img = self.frame
+            ret, img = vid.read()
+            # img = self.frame
             # cv2.imshow('frame', img)
             gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
             faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
@@ -63,8 +64,8 @@ class T_click():
 
         print('almost done! now make various common facial expressions and scan the screen until prompted')
         for i in range(self.num_other_frames // 2):
-            # ret, img = vid.read()
-            img = self.frame
+            ret, img = vid.read()
+            # img = self.frame
             # cv2.imshow('frame', img)
             gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
             faces = self.face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
@@ -138,8 +139,8 @@ class T_click():
             return tongue_out
 
     def t_click_train(self):
-        # vid = cv2.VideoCapture(0)
-        (x_train, y_train, x_test, y_test) = self.get_data(self.frame)
+        vid = cv2.VideoCapture(0)
+        (x_train, y_train, x_test, y_test) = self.get_data(vid)
 
         model = self.make_model()
         model.compile(loss='binary_crossentropy',
@@ -148,8 +149,8 @@ class T_click():
         model.fit(x_train.reshape(x_train.shape[0], 32,32,1), y_train, epochs=10)
         model.evaluate(x_test.reshape(x_test.shape[0], 32,32,1), y_test)
         model.save('click/saved_t_click_model/')
-        # vid.release()
-        # cv2.destroyAllWindows()
+        vid.release()
+        cv2.destroyAllWindows()
         return model
     
     def t_click_detect_continuously(self):
@@ -165,6 +166,7 @@ class T_click():
 
         while True:
             if not self.camstart:
+                sleep(0.001)
                 continue
             print("----------running tongue detecting---------")
             t_out = self.detect(model, self.frame)
@@ -181,7 +183,8 @@ class T_click():
                     print('####### CLICK ACTIONED #######')
                     clicked_recent = True
                     self.mouse.press(Button.left)
-                    self.mouse.release(Button.left)
+            else:
+                self.mouse.release(Button.left)
 
 
 

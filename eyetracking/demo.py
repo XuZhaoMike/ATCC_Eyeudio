@@ -12,6 +12,7 @@ from .gaze_estimator import GazeEstimator
 from .utils import get_3d_face_model
 
 import mouse
+from time import sleep
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -70,6 +71,7 @@ class Demo:
         # cv2.moveWindow('frame', 500,300)  # Move it
         while True:
             if not self.camstart:
+                sleep(0.001)
                 continue
             if self.config.demo.display_on_screen:
                 self._wait_key()

@@ -69,7 +69,9 @@ class MainWindow():
             self.tclick.camstart = True
             self.tclick.frame = self.camera_image
             # img_src = self.fd.image
-        # else:
+        else:
+            self.tracker.demo.camstart = False
+            self.tclick.camstart = False
         img_src = self.camera_image
         # -------------TODO: find a way to use eyetracking stream
         # if self.tracker.demo.visualizer.image is not None:
@@ -167,4 +169,8 @@ class MainWindow():
 
 
 if __name__ == "__main__":
-    MainWindow()
+    train_tongue = input("Do you want to train tongue model? enter 'y' or 'n'\n")
+    if train_tongue == 'y' or train_tongue == 'Y':
+        click.T_click().t_click_train()
+    else:
+        MainWindow()
